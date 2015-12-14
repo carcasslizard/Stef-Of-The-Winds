@@ -42,29 +42,12 @@ class Rect:
 		return (self.x1 <= other.x2 and self.x2 >= other.x1 and
 				self.y1 <= other.y2 and self.y2 >= other.y1)
 
-
-'''
-I need to split up the code fro drawing the room and border for the functions below.
-Should make it easier to get them to do what they need to without being complex;
-Maybe sperate function? ie create_room() and create_roomborder()				
-'''
+#Still need to make a border drawer
+def create_border():
+	global map
+	pass
 
 def create_room(room):
-	global map
-	for x in range(room.x1 + 1, room.x2):
-		for y in range(room.y1, room.y2):
-			if x in [room.x1, room.x2-1] or y in [room.y1, room.y2-1]:
-				if map[x][y].image != floorimage:
-					map[x][y].image = wallimage
-					map[x][y].blocked = True
-					map[x][y].block_sight = True
-			else:
-				#make floor
-				map[x][y].image = floorimage
-				map[x][y].blocked = False
-				map[x][y].block_sight = False
-
-def create_room2(room):
 	global map
 	
 	for x in range(room.x1 + 1, room.x2):
@@ -75,64 +58,12 @@ def create_room2(room):
 
 def create_v_tunnel(y1, y2, x):
 	global map
-	'''
-	#create floor
-	for y in range(min(y1,y2),max(y1,y2)):
-		map[x][y].image = wallimage
-				map[x][y].blocked = True
-				map[x][y].block_sight = True
-	#create wall around floor except where there is floor
-	
-	'''
-	
-	hall = Rect(x, min(y1, y2), 3, abs(y2-y1))
-	create_room(hall)
-	'''
-	#x is middle on tunnel
-	#willmake walls on either side
-	for x2 in range((x - 1),((x + 1) + 1)):
-		for y in range(min(y1, y2), max(y1, y2) + 1):
-			if map[x2][y].image in [blankimage,wallimage]:
-				if x2 in [x-1, x+1]:
-					map[x2][y].image = wallimage
-					map[x2][y].blocked = True
-					map[x2][y].block_sight = True
-				
-				else:
-					map[x2][y].image = floorimage
-					map[x2][y].blocked = False
-					map[x2][y].block_sight = False
-	'''
-					
-def create_h_tunnel(x1, x2, y):
-	global map
-	hall = Rect(min(x1, x2), y , abs(x2-x1), 3 )
-	create_room(hall)
-	'''
-	#y is middle on tunnel
-	#willmake walls on either side
-	for y2 in range((y - 1),(y + 1) + 1):
-		for x in range(min(x1, x2), max(x1, x2) + 1):
-			if map[x][y2].image in [blankimage,wallimage]:
-				if y2 in [y-1, y+1]:
-					map[x][y2].image = wallimage
-					map[x][y2].blocked = True
-					map[x][y2].block_sight = True
-				
-				else:
-					map[x][y2].image = floorimage
-					map[x][y2].blocked = False
-					map[x][y2].block_sight = False
-	'''
-
-def create_v_tunnel2(y1, y2, x):
-	global map
 	for y in range(min(y1,y2),max(y1,y2) + 1):
 		map[x][y].image = floorimage
 		map[x][y].blocked = False
 		map[x][y].block_sight = False
 
-def create_h_tunnel2(x1, x2, y):
+def create_h_tunnel(x1, x2, y):
 	global map
 	for x in range(min(x1,x2),max(x1,x2)+1):
 		map[x][y].image = floorimage
@@ -140,33 +71,6 @@ def create_h_tunnel2(x1, x2, y):
 		map[x][y].block_sight = False		
 	
 def make_map():
-	global map
-	map = []	
-	#create map and set tile sprites
-	for x in range(window.width//32):
-		map.append([])
-		for y in range(window.width//32):
-			#convert map x coord into pix x coord by *32
-			'''
-			#creates map based on map1.py vars
-			if (x,y) in map1.floorlist:
-				map[x].append(Tile(floorimage, x*32, y*32, False))
-			elif (x,y) in map1.walllist:
-				map[x].append(Tile(wallimage, x*32, y*32, True))
-			else:
-				map[x].append(Tile(blankimage, x*32, y*32, True))
-			'''
-			#makes a blank map
-			map[x].append(Tile(blankimage, x*32, y*32, True))
-	room = Rect(0,0,10,10)
-	room2 = Rect(0, 6, 10, 10)
-	create_room(room)
-	create_room(room2)
-	create_v_tunnel(4,8,4)
-	create_h_tunnel(4,18,4)
-	create_v_tunnel(4,10,16)
-
-def make_map2():
 	global map
 	map = []
 	for x in range(window.width//32):
@@ -223,7 +127,6 @@ def make_map2():
 		num_rooms += 1
 	global visible
 	visible = map
-		
 		
 class Actor(pyglet.sprite.Sprite):
 	#generic object for player,monster,item, stairs ect.
