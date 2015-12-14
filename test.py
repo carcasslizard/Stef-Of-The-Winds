@@ -1,3 +1,4 @@
+#!/
 import pyglet
 from pyglet.window import key
 version = '0.0.5'
