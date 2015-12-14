@@ -11,9 +11,9 @@ import map1
 from pyglet.window import key
 version = '0.0.2'
 window = pyglet.window.Window(caption='Stef of the Winds V%s' % version)
-ROOM_MAX_SIZE = 2
-ROOM_MIN_SIZE = 2
-MAX_ROOMS = 1
+ROOM_MAX_SIZE = 4
+ROOM_MIN_SIZE = 4
+MAX_ROOMS = 3
 
 class Tile(pyglet.sprite.Sprite):
 	# x and y in pixels
@@ -44,66 +44,74 @@ class Rect:
 
 #Still need to make a border drawer
 def create_border():
-	global map
+	global dmap
 	pass
 
 def create_room(room):
-	global map
-	
+	global dmap
+	#go through the tiles in the rectangle and make them passable and floor image
 	for x in range(room.x1 + 1, room.x2):
 		for y in range(room.y1 + 1, room.y2):
-			map[x][y].image = floorimage
-			map[x][y].blocked = False
-			map[x][y].block_sight = False
+			dmap[x][y].image = floorimage
+			dmap[x][y].blocked = False
+			dmap[x][y].block_sight = False
 
 def create_v_tunnel(y1, y2, x):
-	global map
-	for y in range(min(y1,y2),max(y1,y2) + 1):
-		map[x][y].image = floorimage
-		map[x][y].blocked = False
-		map[x][y].block_sight = False
+	global dmap
+	#vertical tunnel min() and max() are used in case y1>y2
+	for y in range(min(y1,y2), max(y1,y2) + 1):
+		dmap[x][y].image = floorimage
+		dmap[x][y].blocked = False
+		dmap[x][y].block_sight = False
 
 def create_h_tunnel(x1, x2, y):
-	global map
-	for x in range(min(x1,x2),max(x1,x2)+1):
-		map[x][y].image = floorimage
-		map[x][y].blocked = False
-		map[x][y].block_sight = False		
+	global dmap
+	#horizontal tunnel
+	for x in range(min(x1,x2), max(x1,x2) + 1):
+		dmap[x][y].image = floorimage
+		dmap[x][y].blocked = False
+		dmap[x][y].block_sight = False		
 	
 def make_map():
-	global map
-	map = []
+	global dmap, player
+	
+	#fill map with "blocked" blank image tiles
+	dmap = []
 	for x in range(window.width//32):
-		map.append([])
+		dmap.append([])
 		for y in range(window.width//32):
-			map[x].append(Tile(blankimage, x*32, y*32, True))
+			dmap[x].append(Tile(blankimage, x*32, y*32, True))
 			
 	rooms = []
 	num_rooms = 0
 	
 	for r in range(MAX_ROOMS):
+		#random width and height
 		w = random.randint(ROOM_MIN_SIZE, ROOM_MAX_SIZE)
 		h = random.randint(ROOM_MIN_SIZE, ROOM_MAX_SIZE)
+		#random position without going out of the boundaries of the map
+		x = random.randint(0,((window.width//32) - w - 1))
+		y = random.randint(0,((window.height//32) - h - 1))
 		
-		x = random.randint(0,(window.width//32) - w )
-		y = random.randint(0,(window.height//32) - h )
-		
+		#"Rect" class makes rectangles easier to work with
 		new_room = Rect(x, y, w, h)
 		
+		#run through the other rooms and see if they intersect with this one
 		failed = False
 		for other_room in rooms:
 			if new_room.intersect(other_room):
 				failed = True
 				break
+				
 		if not failed:
+			#this means there are no intersections, so this room is valid
+			create_room(new_room)
 			
-			
-			create_room2(new_room)
-			
+			#center coordinates of new room, will be useful later
 			(new_x, new_y) = new_room.center()
 			
 			if num_rooms == 0:
-				
+				#this is the first room, where the player starts at
 				player.x = new_x * 32
 				player.y = new_y * 32
 				
@@ -112,10 +120,9 @@ def make_map():
 				#connect to previous room with a tunnel
 				
 				#center coordinates of previous room
-				(prev_x, prev_y) = rooms[num_rooms-1].center()
+				(prev_x, prev_y) = rooms[num_rooms - 1].center()
 				
-				#if random.randint(0,1) == 1:
-				if True:
+				if random.randint(0,1) == 1:
 					#create horizontal then vertical hall
 					create_h_tunnel(prev_x, new_x, prev_y)
 					create_v_tunnel(prev_y, new_y, new_x)
@@ -123,10 +130,9 @@ def make_map():
 					#create vertical then horizontal hall
 					create_v_tunnel(prev_y, new_y, prev_x)
 					create_h_tunnel(prev_x, new_x, new_y)
-		rooms.append(new_room)
-		num_rooms += 1
-	global visible
-	visible = map
+					
+			rooms.append(new_room)
+			num_rooms += 1
 		
 class Actor(pyglet.sprite.Sprite):
 	#generic object for player,monster,item, stairs ect.
@@ -151,7 +157,7 @@ class Actor(pyglet.sprite.Sprite):
 		currpos = self.currpos()
 		tx = currpos[0] + x
 		ty = currpos[1] + y
-		if not map[tx][ty].blocked:
+		if not dmap[tx][ty].blocked:
 			self.x += x * 32
 			self.y += y * 32
 
@@ -161,7 +167,7 @@ def on_draw():
 	
 	for x in range(window.width//32):
 		for y in range(window.height//32):
-			visible[x][y].draw()
+			dmap[x][y].draw()
 	print(player.currpos())
 	player.draw()
 
@@ -188,5 +194,6 @@ blankimage =  pyglet.resource.image('blank.png')
 if __name__ == '__main__':
 	
 	player  = Actor(playerimage, x = 6, y = 4)
-	make_map2()
+	make_map()
 	pyglet.app.run()
+	print('done')
