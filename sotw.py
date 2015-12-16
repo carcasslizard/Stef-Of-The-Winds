@@ -20,10 +20,10 @@ MAP_HEIGHT = 480 // 32
 PANEL_WIDTH = 960 // 32
 PANEL_HEIGHT = 256 // 32
 #info box dimenisons in tiles
-INFOBOX_WIDTH = round(PANEL_WIDTH * )
+INFOBOX_WIDTH = round(PANEL_WIDTH *  1)
 INFOBOX_HEIGHT = PANEL_HEIGHT
 #status box dimensions in tiles
-STATBOX_WIDTH = 
+STATBOX_WIDTH = 1
 STATBOX_HEIGHT = PANEL_HEIGHT
 #dungeon generator settings
 ROOM_MAX_SIZE = 4
